@@ -6,13 +6,20 @@ import type {
   CustomQuizPlayerAnswer,
   CustomQuizQuestion,
   CustomQuizQuestionResult,
+  QuizColorId,
 } from 'src/types/customQuiz';
 
 const CORRECT_POINTS = 100;
 const SPEED_BONUS = [50, 30, 10];
 
+type PlayablePhase = Exclude<
+  CustomQuizPhase,
+  'SETUP' | 'PAUSED' | 'FINAL_SCOREBOARD'
+>;
+
 export const useCustomQuizStore = defineStore('custom-quiz', () => {
   const phase = ref<CustomQuizPhase>('SETUP');
+  const previousPhase = ref<PlayablePhase | undefined>(undefined);
   const questions = ref<CustomQuizQuestion[]>([]);
   const players = ref<CustomQuizPlayer[]>([]);
   const currentQuestionIndex = ref(0);
@@ -54,11 +61,23 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
   });
 
   const isLastQuestion = computed(() => {
-    return questions.value.length > 0 && currentQuestionIndex.value + 1 >= questions.value.length;
+    return (
+      questions.value.length > 0 &&
+      currentQuestionIndex.value + 1 >= questions.value.length
+    );
+  });
+
+  const allPlayersAnswered = computed(() => {
+    return (
+      phase.value === 'ANSWERS_OPEN' &&
+      players.value.length > 0 &&
+      Object.keys(currentAnswers.value).length >= players.value.length
+    );
   });
 
   function reset() {
     phase.value = 'SETUP';
+    previousPhase.value = undefined;
     players.value = [];
     currentQuestionIndex.value = 0;
     currentAnswers.value = {};
@@ -96,8 +115,21 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
     phase.value = 'ANSWERS_OPEN';
   }
 
-  function registerAnswer(playerId: string, answerId: string) {
+  function registerAnswer(playerId: string, answerId: QuizColorId) {
     if (phase.value !== 'ANSWERS_OPEN') {
+      return;
+    }
+
+    if (!players.value.some((player) => player.id === playerId)) {
+      return;
+    }
+
+    const question = currentQuestion.value;
+    if (!question) {
+      return;
+    }
+
+    if (!question.answers.some((answer) => answer.id === answerId)) {
       return;
     }
 
@@ -111,6 +143,10 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
       answerId,
       answeredAtMs: Date.now() - base,
     };
+
+    if (Object.keys(currentAnswers.value).length >= players.value.length) {
+      closeAnswersAndScore();
+    }
   }
 
   function closeAnswersAndScore() {
@@ -175,6 +211,37 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
     phase.value = 'QUESTION';
   }
 
+  function pause() {
+    if (
+      phase.value !== 'QUESTION' &&
+      phase.value !== 'ANSWERS_OPEN' &&
+      phase.value !== 'CORRECTION' &&
+      phase.value !== 'QUESTION_PODIUM'
+    ) {
+      return;
+    }
+
+    previousPhase.value = phase.value;
+    phase.value = 'PAUSED';
+  }
+
+  function resume() {
+    if (phase.value !== 'PAUSED') {
+      return;
+    }
+
+    if (!previousPhase.value) {
+      phase.value = 'QUESTION';
+      return;
+    }
+
+    phase.value = previousPhase.value;
+  }
+
+  function stop() {
+    reset();
+  }
+
   return {
     phase,
     questions,
@@ -185,6 +252,7 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
     sortedScoreboard,
     questionProgressLabel,
     isLastQuestion,
+    allPlayersAnswered,
 
     setQuestions,
     start,
@@ -193,6 +261,9 @@ export const useCustomQuizStore = defineStore('custom-quiz', () => {
     closeAnswersAndScore,
     toQuestionPodium,
     nextQuestionOrFinish,
+    pause,
+    resume,
+    stop,
     reset,
   };
 });

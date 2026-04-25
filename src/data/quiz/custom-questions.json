@@ -2,34 +2,37 @@
   {
     "id": "q1",
     "question": "Quelle est la capitale du Japon ?",
+    "answerCount": 4,
     "answers": [
-      { "id": "A", "text": "Seoul" },
-      { "id": "B", "text": "Tokyo" },
-      { "id": "C", "text": "Pekin" },
-      { "id": "D", "text": "Osaka" }
+      { "id": "BLUE", "text": "Seoul" },
+      { "id": "ORANGE", "text": "Tokyo" },
+      { "id": "GREEN", "text": "Pekin" },
+      { "id": "YELLOW", "text": "Osaka" }
     ],
-    "correctAnswer": "B"
+    "correctAnswer": "ORANGE"
   },
   {
     "id": "q2",
     "question": "Combien font 9 x 7 ?",
+    "answerCount": 5,
     "answers": [
-      { "id": "A", "text": "56" },
-      { "id": "B", "text": "63" },
-      { "id": "C", "text": "72" },
-      { "id": "D", "text": "79" }
+      { "id": "BLUE", "text": "56" },
+      { "id": "ORANGE", "text": "63" },
+      { "id": "GREEN", "text": "72" },
+      { "id": "YELLOW", "text": "79" },
+      { "id": "RED", "text": "97" }
     ],
-    "correctAnswer": "B"
+    "correctAnswer": "ORANGE"
   },
   {
     "id": "q3",
     "question": "Quel langage est utilise par Vue 3 pour les composants SFC ?",
+    "answerCount": 3,
     "answers": [
-      { "id": "A", "text": "PHP" },
-      { "id": "B", "text": "Java" },
-      { "id": "C", "text": "HTML/CSS/JS" },
-      { "id": "D", "text": "C" }
+      { "id": "BLUE", "text": "PHP" },
+      { "id": "ORANGE", "text": "Java" },
+      { "id": "GREEN", "text": "HTML/CSS/JS" }
     ],
-    "correctAnswer": "C"
+    "correctAnswer": "GREEN"
   }
 ]

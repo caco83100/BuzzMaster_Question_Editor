@@ -2,20 +2,32 @@ export type CustomQuizPhase =
   | 'SETUP'
   | 'QUESTION'
   | 'ANSWERS_OPEN'
+  | 'PAUSED'
   | 'CORRECTION'
   | 'QUESTION_PODIUM'
   | 'FINAL_SCOREBOARD';
 
+export type QuizColorId = 'RED' | 'BLUE' | 'ORANGE' | 'GREEN' | 'YELLOW';
+
+export const QUIZ_COLOR_ORDER: QuizColorId[] = [
+  'BLUE',
+  'ORANGE',
+  'GREEN',
+  'YELLOW',
+  'RED',
+];
+
 export interface CustomQuizAnswer {
-  id: string;
+  id: QuizColorId;
   text: string;
 }
 
 export interface CustomQuizQuestion {
   id: string;
   question: string;
+  answerCount: number;
   answers: CustomQuizAnswer[];
-  correctAnswer: string;
+  correctAnswer: QuizColorId;
 }
 
 export interface CustomQuizPlayer {
@@ -25,7 +37,7 @@ export interface CustomQuizPlayer {
 
 export interface CustomQuizPlayerAnswer {
   playerId: string;
-  answerId: string;
+  answerId: QuizColorId;
   answeredAtMs: number;
 }
 

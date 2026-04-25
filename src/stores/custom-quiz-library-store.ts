@@ -1,7 +1,13 @@
 import { acceptHMRUpdate, defineStore } from 'pinia';
 import { computed, ref } from 'vue';
 import questionsJson from 'src/data/quiz/custom-questions.json';
-import type { CustomQuizDefinition, CustomQuizQuestion } from 'src/types/customQuiz';
+import type {
+  CustomQuizAnswer,
+  CustomQuizDefinition,
+  CustomQuizQuestion,
+  QuizColorId,
+} from 'src/types/customQuiz';
+import { QUIZ_COLOR_ORDER } from 'src/types/customQuiz';
 
 const STORAGE_KEY = 'buzzmaster.customQuizLibrary.v1';
 
@@ -10,8 +16,18 @@ type QuizLibraryStorage = {
   quizzes: CustomQuizDefinition[];
 };
 
+const LEGACY_COLOR_MAP: Record<string, QuizColorId> = {
+  A: 'BLUE',
+  B: 'ORANGE',
+  C: 'GREEN',
+  D: 'YELLOW',
+  E: 'RED',
+};
+
 function defaultQuestions(): CustomQuizQuestion[] {
-  return structuredClone(questionsJson as CustomQuizQuestion[]);
+  return (questionsJson as CustomQuizQuestion[]).map((question) =>
+    sanitizeQuestion(question),
+  );
 }
 
 function createDefaultQuiz(): CustomQuizDefinition {
@@ -23,31 +39,77 @@ function createDefaultQuiz(): CustomQuizDefinition {
   };
 }
 
+function normalizeColorId(value: unknown): QuizColorId | undefined {
+  if (typeof value !== 'string') {
+    return undefined;
+  }
+
+  const normalized = value.toUpperCase();
+  if (normalized in LEGACY_COLOR_MAP) {
+    return LEGACY_COLOR_MAP[normalized]!;
+  }
+
+  return QUIZ_COLOR_ORDER.find((color) => color === normalized as QuizColorId);
+}
+
+function clampAnswerCount(value: number): number {
+  if (value < 2) {
+    return 2;
+  }
+  if (value > 5) {
+    return 5;
+  }
+  return value;
+}
+
+function buildAnswers(
+  rawAnswers: Array<Partial<CustomQuizAnswer>>,
+  answerCount: number,
+): CustomQuizAnswer[] {
+  const targetColors = QUIZ_COLOR_ORDER.slice(0, answerCount);
+
+  const textByColor: Partial<Record<QuizColorId, string>> = {};
+  rawAnswers.forEach((answer, index) => {
+    const color = normalizeColorId(answer.id) ?? targetColors[index];
+    if (!color) {
+      return;
+    }
+
+    if (textByColor[color] !== undefined) {
+      return;
+    }
+
+    textByColor[color] = typeof answer.text === 'string' ? answer.text : '';
+  });
+
+  return targetColors.map((color) => ({
+    id: color,
+    text: textByColor[color] ?? '',
+  }));
+}
+
 function sanitizeQuestion(
   question: Partial<CustomQuizQuestion> | undefined,
 ): CustomQuizQuestion {
-  const sourceAnswers = Array.isArray(question?.answers) ? question.answers : [];
-  const answers = sourceAnswers.slice(0, 4);
-  while (answers.length < 4) {
-    const id = String.fromCharCode('A'.charCodeAt(0) + answers.length);
-    answers.push({
-      id,
-      text: '',
-    });
-  }
+  const rawAnswers = Array.isArray(question?.answers) ? question.answers : [];
+  const rawAnswerCount =
+    typeof question?.answerCount === 'number'
+      ? question.answerCount
+      : rawAnswers.length || 4;
+  const answerCount = clampAnswerCount(rawAnswerCount);
+  const answers = buildAnswers(rawAnswers, answerCount);
+
+  const correctAnswer = normalizeColorId(question?.correctAnswer) ?? answers[0]!.id;
+  const correctedAnswer = answers.some((answer) => answer.id === correctAnswer)
+    ? correctAnswer
+    : answers[0]!.id;
 
   return {
     id: question?.id || crypto.randomUUID(),
     question: question?.question ?? '',
-    answers: answers.map((answer, index) => ({
-      id:
-        (typeof answer.id === 'string' && answer.id.length > 0
-          ? answer.id
-          : undefined) || String.fromCharCode('A'.charCodeAt(0) + index),
-      text: typeof answer.text === 'string' ? answer.text : '',
-    })),
-    correctAnswer:
-      typeof question?.correctAnswer === 'string' ? question.correctAnswer : 'A',
+    answerCount,
+    answers,
+    correctAnswer: correctedAnswer,
   };
 }
 
@@ -93,9 +155,9 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
 
     try {
       const parsed = JSON.parse(raw) as Partial<QuizLibraryStorage>;
-      const parsedQuizzes = (Array.isArray(parsed.quizzes) ? parsed.quizzes : []).map((quiz) =>
-        sanitizeQuiz(quiz),
-      );
+      const parsedQuizzes = (
+        Array.isArray(parsed.quizzes) ? parsed.quizzes : []
+      ).map((quiz) => sanitizeQuiz(quiz));
 
       if (parsedQuizzes.length === 0) {
         const initialQuiz = createDefaultQuiz();
@@ -112,7 +174,9 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
         ? parsedQuizzes.some((quiz) => quiz.id === candidateId)
         : false;
 
-      selectedQuizId.value = hasCandidate ? (candidateId as string) : parsedQuizzes[0]!.id;
+      selectedQuizId.value = hasCandidate
+        ? (candidateId as string)
+        : parsedQuizzes[0]!.id;
     } catch {
       const initialQuiz = createDefaultQuiz();
       quizzes.value = [initialQuiz];
@@ -139,6 +203,11 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
   }
 
   function createQuiz() {
+    const answers = QUIZ_COLOR_ORDER.slice(0, 4).map((id) => ({
+      id,
+      text: '',
+    }));
+
     const quiz: CustomQuizDefinition = {
       id: crypto.randomUUID(),
       name: `Nouveau quiz ${quizzes.value.length + 1}`,
@@ -146,13 +215,9 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
         {
           id: crypto.randomUUID(),
           question: '',
-          answers: [
-            { id: 'A', text: '' },
-            { id: 'B', text: '' },
-            { id: 'C', text: '' },
-            { id: 'D', text: '' },
-          ],
-          correctAnswer: 'A',
+          answerCount: 4,
+          answers,
+          correctAnswer: answers[0]!.id,
         },
       ],
       updatedAtMs: Date.now(),
@@ -168,7 +233,9 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
       return;
     }
 
-    quizzes.value = quizzes.value.filter((quiz) => quiz.id !== selectedQuiz.value?.id);
+    quizzes.value = quizzes.value.filter(
+      (quiz) => quiz.id !== selectedQuiz.value?.id,
+    );
 
     if (quizzes.value.length === 0) {
       const fallback = createDefaultQuiz();
@@ -215,5 +282,7 @@ export const useCustomQuizLibraryStore = defineStore('custom-quiz-library', () =
 });
 
 if (import.meta.hot) {
-  import.meta.hot.accept(acceptHMRUpdate(useCustomQuizLibraryStore, import.meta.hot));
+  import.meta.hot.accept(
+    acceptHMRUpdate(useCustomQuizLibraryStore, import.meta.hot),
+  );
 }
