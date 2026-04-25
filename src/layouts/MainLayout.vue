@@ -66,7 +66,7 @@
           <div
             v-if="expandSettings"
             key="settings"
-            class="settings-container bg-white row no-wrap"
+            class="settings-container row no-wrap"
           >
             <!-- Pin -->
             <q-btn
@@ -560,6 +560,14 @@ function toValue<T>(value: T): T {
 .settings-container {
   padding: 2px;
   border-radius: 20px;
+  background: rgba(255, 255, 255, 0.74);
+  border: 1px solid rgba(148, 163, 184, 0.35);
+  backdrop-filter: blur(6px);
+}
+
+body.body--dark .settings-container {
+  background: rgba(15, 23, 42, 0.78);
+  border-color: rgba(148, 163, 184, 0.3);
 }
 
 .settings-button {

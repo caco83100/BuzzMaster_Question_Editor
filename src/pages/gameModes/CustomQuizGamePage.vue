@@ -1,12 +1,21 @@
 <template>
   <q-page
-    class="row justify-center"
+    class="row justify-center custom-quiz-page"
+    :class="{ 'custom-quiz-page--dark': isDark }"
     padding
   >
-    <div class="col-12 col-xl-11 column q-gutter-md">
-      <div class="row items-center justify-between">
-        <div class="text-h5">Custom Quiz</div>
-        <div class="text-subtitle2">Question {{ gameStore.questionProgressLabel }}</div>
+    <div class="col-12 col-xl-11 column q-gutter-md custom-shell">
+      <div class="row items-center justify-between header-wrap">
+        <div class="column">
+          <div class="text-overline text-weight-bold header-kicker">BuzzMaster</div>
+          <div class="text-h4 text-weight-bold">Custom Quiz</div>
+        </div>
+        <q-badge
+          rounded
+          color="primary"
+          class="progress-badge"
+          :label="`Question ${gameStore.questionProgressLabel}`"
+        />
       </div>
 
       <q-separator />
@@ -49,11 +58,10 @@
           <q-card
             flat
             bordered
-            class="fit"
+            class="fit panel-card"
           >
             <q-card-section class="row items-center q-gutter-sm">
-              <div class="text-subtitle1">Quiz sauvegardes</div>
-              <q-space />
+              <div class="text-subtitle1 text-weight-bold">Quiz sauvegardes</div>
             </q-card-section>
 
             <q-separator />
@@ -63,9 +71,10 @@
                 <q-item
                   v-for="quiz in libraryStore.quizzes"
                   :key="quiz.id"
+                  class="quiz-list-item"
                   clickable
                   :active="quiz.id === libraryStore.selectedQuizId"
-                  active-class="bg-primary text-white"
+                  active-class="quiz-list-item-active"
                   @click="onQuizSelect(quiz.id)"
                 >
                   <q-item-section>
@@ -97,7 +106,9 @@
                     </q-btn>
                   </q-item-section>
                 </q-item>
+
                 <q-item
+                  class="quiz-list-item quiz-list-item-add"
                   clickable
                   @click="createQuizFromList"
                 >
@@ -108,7 +119,7 @@
                     />
                   </q-item-section>
                   <q-item-section>
-                    <q-item-label>Ajouter un quiz</q-item-label>
+                    <q-item-label class="text-weight-medium">Ajouter un quiz</q-item-label>
                   </q-item-section>
                 </q-item>
               </q-list>
@@ -140,9 +151,10 @@
           <q-card
             flat
             bordered
+            class="panel-card"
           >
             <q-card-section>
-              <div class="text-subtitle1 q-mb-sm">Joueurs</div>
+              <div class="text-subtitle1 text-weight-bold q-mb-sm">Joueurs</div>
               <div class="text-body2 q-mb-sm">
                 Controllers detectes: <b>{{ controllers.length }}</b>
               </div>
@@ -319,8 +331,9 @@
         <q-card
           flat
           bordered
+          class="panel-card"
         >
-          <q-card-section class="text-h6">Quiz en pause</q-card-section>
+          <q-card-section class="text-h6 text-weight-bold">Quiz en pause</q-card-section>
           <q-card-actions>
             <q-btn
               color="primary"
@@ -345,28 +358,52 @@
         v-if="gameStore.phase === 'QUESTION' || gameStore.phase === 'ANSWERS_OPEN'"
         class="column q-gutter-md"
       >
-        <div class="text-h6">{{ gameStore.currentQuestion?.question }}</div>
-        <q-list
+        <q-card
+          flat
           bordered
-          separator
+          class="panel-card question-card"
         >
-          <q-item
+          <q-card-section>
+            <div class="text-overline">Question en cours</div>
+            <div class="text-h5 text-weight-bold">
+              {{ gameStore.currentQuestion?.question }}
+            </div>
+          </q-card-section>
+        </q-card>
+
+        <div class="answers-grid">
+          <q-card
             v-for="answer in gameStore.currentQuestion?.answers ?? []"
             :key="answer.id"
+            flat
+            bordered
+            class="answer-tile"
+            :class="`answer-tile--${answer.id.toLowerCase()}`"
           >
-            <q-item-section avatar>
-              <q-badge
-                :color="colorMeta[answer.id].uiColor"
-                :label="colorMeta[answer.id].label"
-              />
-            </q-item-section>
-            <q-item-section>{{ answer.text }}</q-item-section>
-          </q-item>
-        </q-list>
+            <q-card-section class="row items-center q-gutter-sm">
+              <q-avatar
+                size="md"
+                :style="{
+                  background: colorMeta[answer.id].hex,
+                  color: answer.id === 'YELLOW' ? '#111827' : '#ffffff',
+                }"
+              >
+                <q-icon name="circle" />
+              </q-avatar>
+              <div class="column">
+                <div class="text-subtitle2 text-weight-bold">
+                  {{ colorMeta[answer.id].label }}
+                </div>
+                <div class="text-body1">{{ answer.text }}</div>
+              </div>
+            </q-card-section>
+          </q-card>
+        </div>
 
         <q-card
           flat
           bordered
+          class="panel-card"
         >
           <q-card-section>
             <div class="text-subtitle2">Boutons buzzer utilises comme reponses</div>
@@ -406,9 +443,10 @@
           v-if="gameStore.phase === 'ANSWERS_OPEN'"
           flat
           bordered
+          class="panel-card"
         >
           <q-card-section>
-            <div class="text-subtitle1 q-mb-sm">Entrées mock UI</div>
+            <div class="text-subtitle1 q-mb-sm">Entrees mock UI</div>
             <div class="column q-gutter-sm">
               <div
                 v-for="player in gameStore.players"
@@ -441,6 +479,7 @@
           v-if="gameStore.phase === 'ANSWERS_OPEN'"
           flat
           bordered
+          class="panel-card"
         >
           <q-card-section>
             <div class="text-subtitle1 q-mb-sm">Live answers</div>
@@ -456,6 +495,7 @@
                 <q-item-section side>
                   <q-badge
                     :color="colorMeta[item.answerId].uiColor"
+                    :text-color="badgeTextColor(item.answerId)"
                     :label="colorMeta[item.answerId].label"
                   />
                 </q-item-section>
@@ -470,18 +510,27 @@
         v-if="gameStore.phase === 'CORRECTION'"
         class="column q-gutter-md"
       >
-        <div class="text-h6">
-          Correction:
-          <q-badge
-            v-if="gameStore.currentQuestion"
-            :color="colorMeta[gameStore.currentQuestion.correctAnswer].uiColor"
-            :label="colorMeta[gameStore.currentQuestion.correctAnswer].label"
-          />
-        </div>
+        <q-card
+          flat
+          bordered
+          class="panel-card"
+        >
+          <q-card-section class="row items-center q-gutter-sm">
+            <div class="text-h6 text-weight-bold">Correction</div>
+            <q-badge
+              v-if="gameStore.currentQuestion"
+              :color="colorMeta[gameStore.currentQuestion.correctAnswer].uiColor"
+              :text-color="badgeTextColor(gameStore.currentQuestion.correctAnswer)"
+              class="text-weight-bold"
+              :label="colorMeta[gameStore.currentQuestion.correctAnswer].label"
+            />
+          </q-card-section>
+        </q-card>
 
         <q-list
           bordered
           separator
+          class="panel-card"
         >
           <q-item
             v-for="row in correctionRows"
@@ -492,6 +541,7 @@
               <q-badge
                 v-if="row.answerId"
                 :color="colorMeta[row.answerId].uiColor"
+                :text-color="badgeTextColor(row.answerId)"
                 :label="colorMeta[row.answerId].label"
               />
               <q-badge
@@ -523,10 +573,20 @@
         v-if="gameStore.phase === 'QUESTION_PODIUM'"
         class="column q-gutter-md"
       >
-        <div class="text-h6">Podium de la question</div>
+        <q-card
+          flat
+          bordered
+          class="panel-card"
+        >
+          <q-card-section class="text-h6 text-weight-bold">
+            Podium de la question
+          </q-card-section>
+        </q-card>
+
         <q-list
           bordered
           separator
+          class="panel-card"
         >
           <q-item
             v-for="entry in questionPodium"
@@ -534,11 +594,11 @@
           >
             <q-item-section avatar>
               <q-avatar
-                color="primary"
+                :color="podiumMeta(entry.position).color"
                 text-color="white"
                 size="sm"
               >
-                {{ entry.position }}
+                <q-icon :name="podiumMeta(entry.position).icon" />
               </q-avatar>
             </q-item-section>
             <q-item-section>{{ entry.player.name }}</q-item-section>
@@ -559,10 +619,20 @@
         v-if="gameStore.phase === 'FINAL_SCOREBOARD'"
         class="column q-gutter-md"
       >
-        <div class="text-h6">Score final</div>
+        <q-card
+          flat
+          bordered
+          class="panel-card"
+        >
+          <q-card-section class="text-h6 text-weight-bold">
+            Score final
+          </q-card-section>
+        </q-card>
+
         <q-list
           bordered
           separator
+          class="panel-card"
         >
           <q-item
             v-for="entry in finalScoreboard"
@@ -570,11 +640,11 @@
           >
             <q-item-section avatar>
               <q-avatar
-                color="primary"
+                :color="podiumMeta(entry.position).color"
                 text-color="white"
                 size="sm"
               >
-                {{ entry.position }}
+                <q-icon :name="podiumMeta(entry.position).icon" />
               </q-avatar>
             </q-item-section>
             <q-item-section>{{ entry.player.name }}</q-item-section>
@@ -612,12 +682,15 @@ const gameStore = useCustomQuizStore();
 const libraryStore = useCustomQuizLibraryStore();
 const { controllers, buzzer } = useBuzzer();
 
-const colorMeta: Record<QuizColorId, { label: string; uiColor: string }> = {
-  BLUE: { label: 'Bleu', uiColor: 'blue' },
-  ORANGE: { label: 'Orange', uiColor: 'orange' },
-  GREEN: { label: 'Vert', uiColor: 'green' },
-  YELLOW: { label: 'Jaune', uiColor: 'yellow-8' },
-  RED: { label: 'Rouge', uiColor: 'red' },
+const colorMeta: Record<
+  QuizColorId,
+  { label: string; uiColor: string; hex: string }
+> = {
+  BLUE: { label: 'Bleu', uiColor: 'blue', hex: '#1E6BFF' },
+  ORANGE: { label: 'Orange', uiColor: 'orange', hex: '#FF7A00' },
+  GREEN: { label: 'Vert', uiColor: 'green', hex: '#1DB954' },
+  YELLOW: { label: 'Jaune', uiColor: 'yellow-8', hex: '#F4C20D' },
+  RED: { label: 'Rouge', uiColor: 'red', hex: '#E53935' },
 };
 
 const answerCountOptions = [
@@ -635,6 +708,7 @@ const editingQuiz = ref<CustomQuizDefinition>({
 });
 const showEditorDialog = ref(false);
 const mockPlayerCount = ref(4);
+const isDark = computed(() => quasar.dark.isActive);
 
 const buttonToColor: Record<BuzzerButton, QuizColorId> = {
   [BuzzerButton.RED]: 'RED',
@@ -752,6 +826,23 @@ onBeforeMount(() => {
 onUnmounted(() => {
   buzzer.removeListener('press', onBuzzerPress);
 });
+
+function podiumMeta(position: number): { color: string; icon: string } {
+  switch (position) {
+    case 1:
+      return { color: 'amber-8', icon: 'emoji_events' };
+    case 2:
+      return { color: 'blue-grey-5', icon: 'military_tech' };
+    case 3:
+      return { color: 'deep-orange-5', icon: 'workspace_premium' };
+    default:
+      return { color: 'primary', icon: 'looks' };
+  }
+}
+
+function badgeTextColor(answerId: QuizColorId): string {
+  return answerId === 'YELLOW' ? 'dark' : 'white';
+}
 
 function createQuiz() {
   libraryStore.createQuiz();
@@ -914,23 +1005,28 @@ function cloneQuestions(questions: unknown): CustomQuizQuestion[] {
     const rawCount = Number(q.answerCount ?? 4);
     const answerCount = Math.max(2, Math.min(5, rawCount));
     const rawAnswers = Array.isArray(q.answers) ? q.answers : [];
-    const answers = QUIZ_COLOR_ORDER.slice(0, answerCount).map((color, answerIndex) => {
-      const fromRaw = rawAnswers.find((value) => {
-        const item = (value ?? {}) as Record<string, unknown>;
-        return item.id === color;
-      });
-      const fallback = rawAnswers[answerIndex] as Record<string, unknown> | undefined;
-      const text =
-        typeof (fromRaw as Record<string, unknown> | undefined)?.text === 'string'
-          ? (fromRaw as Record<string, unknown>).text
-          : typeof fallback?.text === 'string'
-            ? fallback.text
-            : '';
-      return {
-        id: color,
-        text,
-      };
-    });
+    const answers = QUIZ_COLOR_ORDER.slice(0, answerCount).map(
+      (color, answerIndex) => {
+        const fromRaw = rawAnswers.find((value) => {
+          const item = (value ?? {}) as Record<string, unknown>;
+          return item.id === color;
+        });
+        const fallback = rawAnswers[answerIndex] as
+          | Record<string, unknown>
+          | undefined;
+        const text =
+          typeof (fromRaw as Record<string, unknown> | undefined)?.text ===
+          'string'
+            ? (fromRaw as Record<string, unknown>).text
+            : typeof fallback?.text === 'string'
+              ? fallback.text
+              : '';
+        return {
+          id: color,
+          text,
+        };
+      },
+    );
 
     const requestedCorrect = q.correctAnswer as QuizColorId | undefined;
     const correctAnswer = answers.some((answer) => answer.id === requestedCorrect)
@@ -938,7 +1034,8 @@ function cloneQuestions(questions: unknown): CustomQuizQuestion[] {
       : answers[0]!.id;
 
     return {
-      id: typeof q.id === 'string' && q.id.length > 0 ? q.id : `q-${index + 1}`,
+      id:
+        typeof q.id === 'string' && q.id.length > 0 ? q.id : `q-${index + 1}`,
       question: typeof q.question === 'string' ? q.question : '',
       answerCount,
       answers,
@@ -961,3 +1058,119 @@ function cloneQuizDefinition(quiz: unknown): CustomQuizDefinition {
   };
 }
 </script>
+
+<style scoped>
+.custom-shell {
+  max-width: 1500px;
+  color: #0f172a;
+}
+
+.header-wrap {
+  padding: 0.25rem 0;
+}
+
+.header-kicker {
+  letter-spacing: 0.12em;
+}
+
+.progress-badge {
+  font-size: 0.95rem;
+  padding: 0.5rem 0.85rem;
+}
+
+.panel-card {
+  border-radius: 16px;
+  background: linear-gradient(180deg, rgba(255, 255, 255, 0.96), rgba(248, 250, 255, 0.92));
+  color: #0f172a;
+  box-shadow: 0 6px 22px rgba(17, 24, 39, 0.08);
+}
+
+.panel-card :deep(.q-item__label),
+.panel-card :deep(.q-field__label),
+.panel-card :deep(.q-field__native),
+.panel-card :deep(.q-field__input),
+.panel-card :deep(.q-placeholder) {
+  color: #0f172a;
+}
+
+.custom-quiz-page--dark .custom-shell {
+  color: #e5e7eb;
+}
+
+.custom-quiz-page--dark .panel-card {
+  background: linear-gradient(180deg, rgba(15, 23, 42, 0.94), rgba(17, 24, 39, 0.92));
+  color: #e5e7eb;
+  border-color: rgba(148, 163, 184, 0.35);
+  box-shadow: 0 10px 26px rgba(2, 6, 23, 0.45);
+}
+
+.custom-quiz-page--dark .panel-card :deep(.q-item__label),
+.custom-quiz-page--dark .panel-card :deep(.q-field__label),
+.custom-quiz-page--dark .panel-card :deep(.q-field__native),
+.custom-quiz-page--dark .panel-card :deep(.q-field__input),
+.custom-quiz-page--dark .panel-card :deep(.q-placeholder) {
+  color: #e5e7eb;
+}
+
+.custom-quiz-page--dark .quiz-list-item:hover {
+  background: rgba(59, 130, 246, 0.2);
+}
+
+.quiz-list-item {
+  border-radius: 12px;
+  transition: all 0.2s ease;
+}
+
+.quiz-list-item:hover {
+  background: rgba(30, 107, 255, 0.08);
+}
+
+.quiz-list-item-active {
+  background: linear-gradient(90deg, rgba(30, 107, 255, 0.9), rgba(30, 107, 255, 0.75));
+  color: #fff;
+}
+
+.quiz-list-item-add {
+  border: 1px dashed rgba(30, 107, 255, 0.4);
+}
+
+.question-card {
+  border-left: 6px solid #1e6bff;
+}
+
+.answers-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+  gap: 0.85rem;
+}
+
+.answer-tile {
+  border-radius: 14px;
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+}
+
+.answer-tile:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.12);
+}
+
+.answer-tile--blue {
+  border-left: 6px solid #1e6bff;
+}
+
+.answer-tile--orange {
+  border-left: 6px solid #ff7a00;
+}
+
+.answer-tile--green {
+  border-left: 6px solid #1db954;
+}
+
+.answer-tile--yellow {
+  border-left: 6px solid #f4c20d;
+}
+
+.answer-tile--red {
+  border-left: 6px solid #e53935;
+}
+</style>

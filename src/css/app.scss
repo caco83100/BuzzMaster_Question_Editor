@@ -1,5 +1,99 @@
 // app global css in SCSS form
 
+:root {
+  --bm-radius-card: 16px;
+  --bm-radius-btn: 12px;
+  --bm-btn-shadow: 0 6px 16px rgba(15, 23, 42, 0.14);
+  --bm-btn-shadow-hover: 0 10px 22px rgba(15, 23, 42, 0.2);
+}
+
+body.body--light {
+  background:
+    radial-gradient(circle at 8% 12%, rgba(30, 107, 255, 0.12), transparent 45%),
+    radial-gradient(circle at 92% 10%, rgba(255, 122, 0, 0.1), transparent 42%),
+    radial-gradient(circle at 50% 92%, rgba(29, 185, 84, 0.08), transparent 35%),
+    #f2f6ff;
+}
+
+body.body--dark {
+  background:
+    radial-gradient(circle at 12% 10%, rgba(30, 107, 255, 0.22), transparent 45%),
+    radial-gradient(circle at 90% 8%, rgba(255, 122, 0, 0.18), transparent 42%),
+    radial-gradient(circle at 50% 90%, rgba(29, 185, 84, 0.16), transparent 35%),
+    linear-gradient(180deg, #0b1220 0%, #111827 100%);
+}
+
+#q-app,
+.q-layout,
+.q-page-container,
+.q-page {
+  background: transparent !important;
+}
+
+.q-card {
+  border-radius: var(--bm-radius-card);
+}
+
+.q-btn {
+  border-radius: var(--bm-radius-btn);
+  text-transform: none;
+  letter-spacing: 0.01em;
+  font-weight: 650;
+  transition:
+    transform 0.14s ease,
+    box-shadow 0.16s ease,
+    filter 0.16s ease;
+}
+
+.q-btn:not(.q-btn--round):not(.q-btn--fab) {
+  min-height: 38px;
+  padding-inline: 14px;
+}
+
+.q-btn:hover {
+  transform: translateY(-1px);
+}
+
+.q-btn.bg-primary,
+.q-btn.bg-positive,
+.q-btn.bg-negative,
+.q-btn.bg-orange,
+.q-btn.bg-deep-orange,
+.q-btn.bg-accent {
+  box-shadow: var(--bm-btn-shadow);
+}
+
+.q-btn.bg-primary:hover,
+.q-btn.bg-positive:hover,
+.q-btn.bg-negative:hover,
+.q-btn.bg-orange:hover,
+.q-btn.bg-deep-orange:hover,
+.q-btn.bg-accent:hover {
+  box-shadow: var(--bm-btn-shadow-hover);
+  filter: saturate(1.05);
+}
+
+.q-btn.q-btn--outline {
+  border-width: 1.5px;
+}
+
+body.body--light .q-btn.q-btn--outline {
+  background: rgba(255, 255, 255, 0.62);
+}
+
+body.body--dark .q-btn.q-btn--outline {
+  background: rgba(15, 23, 42, 0.45);
+}
+
+body.body--dark .q-btn.bg-primary,
+body.body--dark .q-btn.bg-positive,
+body.body--dark .q-btn.bg-negative,
+body.body--dark .q-btn.bg-orange,
+body.body--dark .q-btn.bg-deep-orange,
+body.body--dark .q-btn.bg-accent {
+  box-shadow: 0 8px 20px rgba(2, 6, 23, 0.48);
+}
+
 /* Scrollbar */
 /* width */
 ::-webkit-scrollbar {
