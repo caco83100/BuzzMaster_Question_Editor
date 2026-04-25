@@ -84,6 +84,14 @@ const routes: RouteRecordRaw[] = [
             },
           },
           {
+            path: 'custom-quiz',
+            name: 'custom-quiz-game',
+            component: () => import('pages/gameModes/CustomQuizGamePage.vue'),
+            meta: {
+              title: 'Custom Quiz MVP',
+            },
+          },
+          {
             path: 'stopwatch',
             name: 'stopwatch-game',
             component: () => import('pages/gameModes/StopwatchGamePage.vue'),

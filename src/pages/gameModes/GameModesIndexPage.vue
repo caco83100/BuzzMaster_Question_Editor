@@ -44,6 +44,11 @@ const items = computed<MenuItem[]>(() => [
     icon: 'format_list_numbered',
   },
   {
+    routeName: 'custom-quiz-game',
+    label: 'Custom Quiz MVP',
+    icon: 'quiz',
+  },
+  {
     routeName: 'stopwatch-game',
     label: t('gameMode.action.stopwatch'),
     icon: 'timer',

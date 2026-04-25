@@ -6,6 +6,7 @@ import {
 } from 'src/plugins/buzzer/types';
 import { initHidDeviceManager } from 'src/plugins/buzzer/hid';
 import { BuzzerApi } from 'src/plugins/buzzer/BuzzerApi';
+import { initMockDeviceManager } from 'src/plugins/buzzer/mock';
 
 export const useBuzzer = () => {
   const buzzerApi = inject<IBuzzerApi>('buzzer');
@@ -29,7 +30,11 @@ export const useBuzzer = () => {
   };
 };
 
-const deviceManagers: IBuzzerPlugin[] = [initHidDeviceManager];
+const deviceManagers: IBuzzerPlugin[] = [
+  initHidDeviceManager,
+  // TODO remove later: temporary mock manager for local/dev testing without hardware.
+  initMockDeviceManager,
+];
 
 export const initBuzzerApi = async (api: BuzzerApi): Promise<IBuzzerApi> => {
   // Init all device managers

@@ -1,0 +1,35 @@
+[
+  {
+    "id": "q1",
+    "question": "Quelle est la capitale du Japon ?",
+    "answers": [
+      { "id": "A", "text": "Seoul" },
+      { "id": "B", "text": "Tokyo" },
+      { "id": "C", "text": "Pekin" },
+      { "id": "D", "text": "Osaka" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": "q2",
+    "question": "Combien font 9 x 7 ?",
+    "answers": [
+      { "id": "A", "text": "56" },
+      { "id": "B", "text": "63" },
+      { "id": "C", "text": "72" },
+      { "id": "D", "text": "79" }
+    ],
+    "correctAnswer": "B"
+  },
+  {
+    "id": "q3",
+    "question": "Quel langage est utilise par Vue 3 pour les composants SFC ?",
+    "answers": [
+      { "id": "A", "text": "PHP" },
+      { "id": "B", "text": "Java" },
+      { "id": "C", "text": "HTML/CSS/JS" },
+      { "id": "D", "text": "C" }
+    ],
+    "correctAnswer": "C"
+  }
+]
