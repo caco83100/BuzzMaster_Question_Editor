@@ -1014,12 +1014,14 @@ function cloneQuestions(questions: unknown): CustomQuizQuestion[] {
         const fallback = rawAnswers[answerIndex] as
           | Record<string, unknown>
           | undefined;
+        const fromRawText = (fromRaw as Record<string, unknown> | undefined)
+          ?.text;
+        const fallbackText = fallback?.text;
         const text =
-          typeof (fromRaw as Record<string, unknown> | undefined)?.text ===
-          'string'
-            ? (fromRaw as Record<string, unknown>).text
-            : typeof fallback?.text === 'string'
-              ? fallback.text
+          typeof fromRawText === 'string'
+            ? fromRawText
+            : typeof fallbackText === 'string'
+              ? fallbackText
               : '';
         return {
           id: color,
