@@ -23,7 +23,10 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
+
+      - name: Workaround npm optional deps bug (rollup linux binary)
+        run: npm i @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Run Prettier
         run: npm run format:check
@@ -45,7 +48,10 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
+
+      - name: Workaround npm optional deps bug (rollup linux binary)
+        run: npm i @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Run Lint
         run: npm run lint
@@ -64,7 +70,10 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
+
+      - name: Workaround npm optional deps bug (rollup linux binary)
+        run: npm i @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Test
         run: npm run test:unit:ci
@@ -83,7 +92,10 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci
+        run: npm ci --include=optional
+
+      - name: Workaround npm optional deps bug (rollup linux binary)
+        run: npm i @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Build
         run: npm run build

@@ -26,7 +26,11 @@ jobs:
           node-version: 22
           cache: npm
 
-      - run: npm ci
+      - name: Install dependencies
+        run: npm ci --include=optional
+
+      - name: Workaround npm optional deps bug (rollup linux binary)
+        run: npm i @rollup/rollup-linux-x64-gnu --no-save
 
       - name: Build SPA for GitHub Pages
         run: npx quasar build -m spa
