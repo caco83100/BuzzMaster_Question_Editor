@@ -23,10 +23,13 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --include=optional
+        run: npm ci --include=optional --ignore-scripts
 
       - name: Workaround npm optional deps bug (rollup linux binary)
         run: npm i @rollup/rollup-linux-x64-gnu --no-save
+
+      - name: Run postinstall scripts
+        run: npm run postinstall
 
       - name: Run Prettier
         run: npm run format:check
@@ -48,10 +51,13 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --include=optional
+        run: npm ci --include=optional --ignore-scripts
 
       - name: Workaround npm optional deps bug (rollup linux binary)
         run: npm i @rollup/rollup-linux-x64-gnu --no-save
+
+      - name: Run postinstall scripts
+        run: npm run postinstall
 
       - name: Run Lint
         run: npm run lint
@@ -70,10 +76,13 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --include=optional
+        run: npm ci --include=optional --ignore-scripts
 
       - name: Workaround npm optional deps bug (rollup linux binary)
         run: npm i @rollup/rollup-linux-x64-gnu --no-save
+
+      - name: Run postinstall scripts
+        run: npm run postinstall
 
       - name: Test
         run: npm run test:unit:ci
@@ -92,10 +101,13 @@ jobs:
           node-version: '22'
 
       - name: Install dependencies
-        run: npm ci --include=optional
+        run: npm ci --include=optional --ignore-scripts
 
       - name: Workaround npm optional deps bug (rollup linux binary)
         run: npm i @rollup/rollup-linux-x64-gnu --no-save
+
+      - name: Run postinstall scripts
+        run: npm run postinstall
 
       - name: Build
         run: npm run build
