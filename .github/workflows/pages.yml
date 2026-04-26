@@ -29,8 +29,8 @@ jobs:
       - name: Install dependencies
         run: npm ci --include=optional --ignore-scripts
 
-      - name: Workaround npm optional deps bug (rollup linux binary)
-        run: npm i @rollup/rollup-linux-x64-gnu --no-save
+      - name: Workaround npm optional deps bug (native linux bindings)
+        run: npm i @rollup/rollup-linux-x64-gnu @rolldown/binding-linux-x64-gnu --no-save
 
       - name: Run postinstall scripts
         run: npm run postinstall
